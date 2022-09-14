@@ -47,17 +47,15 @@ def parse_arguments():
 def macs2_signal_track(ta, chrsz, gensz, pval_thresh, smooth_win, mem_gb, out_dir):
     prefix = os.path.join(out_dir,
                           os.path.basename(strip_ext_ta(ta)))
-    fc_bigwig = '{}.fc.signal.bigwig'.format(prefix)
-    pval_bigwig = '{}.pval.signal.bigwig'.format(prefix)
+    fc_bigwig = f'{prefix}.fc.signal.bigwig'
+    pval_bigwig = f'{prefix}.pval.signal.bigwig'
     # temporary files
-    fc_bedgraph = '{}.fc.signal.bedgraph'.format(prefix)
-    fc_bedgraph_srt = '{}.fc.signal.srt.bedgraph'.format(prefix)
-    pval_bedgraph = '{}.pval.signal.bedgraph'.format(prefix)
-    pval_bedgraph_srt = '{}.pval.signal.srt.bedgraph'.format(prefix)
+    fc_bedgraph = f'{prefix}.fc.signal.bedgraph'
+    fc_bedgraph_srt = f'{prefix}.fc.signal.srt.bedgraph'
+    pval_bedgraph = f'{prefix}.pval.signal.bedgraph'
+    pval_bedgraph_srt = f'{prefix}.pval.signal.srt.bedgraph'
 
     shiftsize = -int(round(float(smooth_win)/2.0))
-    temp_files = []
-
     run_shell_cmd(
         'macs2 callpeak '
         '-t {ta} -f BED -n {prefix} -g {gensz} -p {pval_thresh} '
@@ -155,8 +153,7 @@ def macs2_signal_track(ta, chrsz, gensz, pval_thresh, smooth_win, mem_gb, out_di
     )
     rm_f(pval_bedgraph_srt)
 
-    # remove temporary files
-    temp_files.append("{prefix}_*".format(prefix=prefix))
+    temp_files = ["{prefix}_*".format(prefix=prefix)]
     rm_f(temp_files)
 
     return fc_bigwig, pval_bigwig

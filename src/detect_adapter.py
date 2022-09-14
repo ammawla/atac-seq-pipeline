@@ -47,16 +47,13 @@ def detect_adapters_and_cnts(fname, max_n_lines=1000000):
 def detect_most_likely_adapter(fname):
     observed_adapters, adapter_cnts, n_obs_adapters = detect_adapters_and_cnts(
         fname)
-    if observed_adapters:
-        best_adapter = observed_adapters[0]
-    else:
-        best_adapter = ""
-
+    best_adapter = observed_adapters[0] if observed_adapters else ""
     if VERBOSE:
         print("\n\nAUTO-DETECTING ADAPTER TYPE\n===========================")
-        print("Attempting to auto-detect adapter type from the first 1 million sequences of the first file (>> {} <<)\n".format(
-            fname)
+        print(
+            f"Attempting to auto-detect adapter type from the first 1 million sequences of the first file (>> {fname} <<)\n"
         )
+
         print("Found perfect matches for the following adapter sequences:")
         print("Adapter type\tCount\tSequence\tSequences analysed\tPercentage")
         for adapter in observed_adapters:
@@ -67,10 +64,7 @@ def detect_most_likely_adapter(fname):
                 n_obs_adapters,
                 adapter_cnts[adapter]/n_obs_adapters)
             )
-    if best_adapter:
-        return adapters[best_adapter].decode()
-    else:
-        return ""
+    return adapters[best_adapter].decode() if best_adapter else ""
 
 
 def main():

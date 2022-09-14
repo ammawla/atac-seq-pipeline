@@ -40,14 +40,13 @@ def blacklist_filter(peak, blacklist, regex_bfilt_peak_chr_name, out_dir):
         out_dir,
         os.path.basename(strip_ext(peak)))
     peak_ext = get_ext(peak)
-    filtered = '{}.bfilt.{}.gz'.format(prefix, peak_ext)
+    filtered = f'{prefix}.bfilt.{peak_ext}.gz'
     if regex_bfilt_peak_chr_name is None:
         regex_bfilt_peak_chr_name = ''
 
     if blacklist is None or blacklist == '' or get_num_lines(peak) == 0 \
             or get_num_lines(blacklist) == 0:
-        cmd = 'zcat -f {} | '
-        cmd += 'grep -P \'{}\\b\' | '
+        cmd = 'zcat -f {} | ' + 'grep -P \'{}\\b\' | '
         cmd += 'gzip -nc > {}'
         cmd = cmd.format(
             peak,
@@ -59,8 +58,11 @@ def blacklist_filter(peak, blacklist, regex_bfilt_peak_chr_name, out_dir):
         tmp1 = gunzip(peak, 'tmp1', out_dir)
         tmp2 = gunzip(blacklist, 'tmp2', out_dir)
 
-        cmd = 'bedtools intersect -nonamecheck -v -a {} -b {} | '
-        cmd += 'awk \'BEGIN{{OFS="\\t"}} '
+        cmd = (
+            'bedtools intersect -nonamecheck -v -a {} -b {} | '
+            + 'awk \'BEGIN{{OFS="\\t"}} '
+        )
+
         cmd += '{{if ($5>1000) $5=1000; print $0}}\' | '
         cmd += 'grep -P \'{}\\b\' | '
         cmd += 'gzip -nc > {}'
@@ -77,7 +79,7 @@ def blacklist_filter(peak, blacklist, regex_bfilt_peak_chr_name, out_dir):
 def blacklist_filter_bam(bam, blacklist, out_dir):
     prefix = os.path.join(out_dir,
                           os.path.basename(strip_ext_bam(bam)))
-    filtered = '{}.bfilt.bam'.format(prefix)
+    filtered = f'{prefix}.bfilt.bam'
 
     if blacklist == '' or get_num_lines(blacklist) == 0:
         cmd = 'cp -f {b} {f}'.format(b=bam, f=filtered)

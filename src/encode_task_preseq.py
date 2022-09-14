@@ -49,10 +49,7 @@ def get_picard_complexity_metrics(aligned_bam, prefix, java_heap=None):
     '''
     # remove redundant (or malformed) info (read group) from bam
     out_file = '{0}.picardcomplexity.qc'.format(prefix)
-    if java_heap is None:
-        java_heap_param = '-Xmx6G'
-    else:
-        java_heap_param = '-Xmx{}'.format(java_heap)
+    java_heap_param = '-Xmx6G' if java_heap is None else f'-Xmx{java_heap}'
     get_gc_metrics = (
         'mkdir -p tmp_java && java -Djava.io.tmpdir=$PWD/tmp_java '
         '{3} -XX:ParallelGCThreads=1 -jar '
@@ -129,7 +126,7 @@ def get_preseq_plot(data_file, prefix):
 
     # plot_img = BytesIO()
     # fig.savefig(plot_img, format='png')
-    plot_img = prefix + '.preseq.png'
+    plot_img = f'{prefix}.preseq.png'
     fig.savefig(plot_img, format='png')
 
     return plot_img
@@ -158,7 +155,7 @@ def main():
 
     # write picard_est_lib_size to file
     if picard_est_lib_size is not None:
-        picard_est_lib_size_file = OUTPUT_PREFIX + '.picard_est_lib_size.qc'
+        picard_est_lib_size_file = f'{OUTPUT_PREFIX}.picard_est_lib_size.qc'
         with open(picard_est_lib_size_file, 'w') as fp:
             fp.write(str(picard_est_lib_size)+'\n')
 

@@ -71,7 +71,7 @@ def rm_unmapped_lowq_reads_se(bam, multimapping, mapq_thresh, nth, mem_gb, out_d
     """
     prefix = os.path.join(out_dir,
                           os.path.basename(strip_ext_bam(bam)))
-    filt_bam = '{}.filt.bam'.format(prefix)
+    filt_bam = f'{prefix}.filt.bam'
 
     if multimapping:
         qname_sort_bam = samtools_name_sort(bam, nth, mem_gb, out_dir)
@@ -111,9 +111,9 @@ def rm_unmapped_lowq_reads_pe(bam, multimapping, mapq_thresh, nth, mem_gb, out_d
     """
     prefix = os.path.join(out_dir,
                           os.path.basename(strip_ext_bam(bam)))
-    filt_bam = '{}.filt.bam'.format(prefix)
-    tmp_filt_bam = '{}.tmp_filt.bam'.format(prefix)
-    fixmate_bam = '{}.fixmate.bam'.format(prefix)
+    filt_bam = f'{prefix}.filt.bam'
+    tmp_filt_bam = f'{prefix}.tmp_filt.bam'
+    fixmate_bam = f'{prefix}.fixmate.bam'
 
     if multimapping:
         run_shell_cmd(
@@ -188,13 +188,9 @@ def mark_dup_picard(bam, out_dir, java_heap=None):  # shared by both se and pe
                           os.path.basename(strip_ext_bam(bam)))
     # strip extension appended in the previous step
     prefix = strip_ext(prefix, 'filt')
-    dupmark_bam = '{}.dupmark.bam'.format(prefix)
-    dup_qc = '{}.dup.qc'.format(prefix)
-    if java_heap is None:
-        java_heap_param = '-Xmx4G'
-    else:
-        java_heap_param = '-Xmx{}'.format(java_heap)
-
+    dupmark_bam = f'{prefix}.dupmark.bam'
+    dup_qc = f'{prefix}.dup.qc'
+    java_heap_param = '-Xmx4G' if java_heap is None else f'-Xmx{java_heap}'
     run_shell_cmd(
         'java {java_heap_param} -XX:ParallelGCThreads=1 '
         '-jar {picard} MarkDuplicates '
@@ -221,11 +217,14 @@ def mark_dup_sambamba(bam, nth, out_dir):  # shared by both se and pe
                           os.path.basename(strip_ext_bam(bam)))
     # strip extension appended in the previous step
     prefix = strip_ext(prefix, 'filt')
-    dupmark_bam = '{}.dupmark.bam'.format(prefix)
+    dupmark_bam = f'{prefix}.dupmark.bam'
     dup_qc = '{}.dup.qc'
 
-    cmd = 'sambamba markdup -t {} --hash-table-size=17592186044416 '
-    cmd += '--overflow-list-size=20000000 '
+    cmd = (
+        'sambamba markdup -t {} --hash-table-size=17592186044416 '
+        + '--overflow-list-size=20000000 '
+    )
+
     cmd += '--io-buffer-size=256 {} {} 2> {}'
     cmd = cmd.format(
         nth,
@@ -241,7 +240,7 @@ def rm_dup_se(dupmark_bam, nth, out_dir):
                           os.path.basename(strip_ext_bam(dupmark_bam)))
     # strip extension appended in the previous step
     prefix = strip_ext(prefix, 'dupmark')
-    nodup_bam = '{}.nodup.bam'.format(prefix)
+    nodup_bam = f'{prefix}.nodup.bam'
 
     run_shell_cmd(
         'samtools view -F 1804 -b {dupmark_bam} {res_param} > {nodup_bam}'.format(
@@ -258,7 +257,7 @@ def rm_dup_pe(dupmark_bam, nth, out_dir):
                           os.path.basename(strip_ext_bam(dupmark_bam)))
     # strip extension appended in the previous step
     prefix = strip_ext(prefix, 'dupmark')
-    nodup_bam = '{}.nodup.bam'.format(prefix)
+    nodup_bam = f'{prefix}.nodup.bam'
 
     run_shell_cmd(
         'samtools view -F 1804 -f 2 -b {dupmark_bam} {res_param} > {nodup_bam}'.format(
@@ -275,7 +274,7 @@ def pbc_qc_se(bam, mito_chr_name, mem_gb, out_dir):
                           os.path.basename(strip_ext_bam(bam)))
     # strip extension appended in the previous step
     prefix = strip_ext(prefix, 'dupmark')
-    pbc_qc = '{}.lib_complexity.qc'.format(prefix)
+    pbc_qc = f'{prefix}.lib_complexity.qc'
 
     run_shell_cmd(
         'bedtools bamtobed -i {bam} | '
@@ -300,7 +299,7 @@ def pbc_qc_se(bam, mito_chr_name, mem_gb, out_dir):
 def pbc_qc_pe(bam, mito_chr_name, nth, mem_gb, out_dir):
     prefix = os.path.join(out_dir,
                           os.path.basename(strip_ext_bam(bam)))
-    pbc_qc = '{}.lib_complexity.qc'.format(prefix)
+    pbc_qc = f'{prefix}.lib_complexity.qc'
 
     nmsrt_bam = samtools_name_sort(bam, nth, mem_gb, out_dir)
 
@@ -364,7 +363,7 @@ def main():
             )
         raise ValueError(help_msg)
 
-    log.info('Marking dupes with {}...'.format(args.dup_marker))
+    log.info(f'Marking dupes with {args.dup_marker}...')
     if args.dup_marker == 'picard':
         dupmark_bam, dup_qc = mark_dup_picard(
             filt_bam, args.out_dir, args.picard_java_heap)
@@ -372,8 +371,7 @@ def main():
         dupmark_bam, dup_qc = mark_dup_sambamba(
             filt_bam, args.nth, args.out_dir)
     else:
-        raise argparse.ArgumentTypeError(
-            'Unsupported --dup-marker {}'.format(args.dup_marker))
+        raise argparse.ArgumentTypeError(f'Unsupported --dup-marker {args.dup_marker}')
 
     if args.no_dup_removal:
         nodup_bam = filt_bam
@@ -387,7 +385,7 @@ def main():
             nodup_bam = rm_dup_se(
                 dupmark_bam, args.nth, args.out_dir)
         samtools_index(dupmark_bam)
-        temp_files.append(dupmark_bam+'.bai')
+        temp_files.append(f'{dupmark_bam}.bai')
     temp_files.append(dupmark_bam)
 
     if len(args.filter_chrs) > 0:

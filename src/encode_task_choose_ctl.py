@@ -120,9 +120,9 @@ def main():
                         args.ctl_depth_ratio:
                     use_pooled_ctl = True
                     log.info(
-                        'Number of reads in controls differ by a factor of {}.'
-                        'Using pooled controls.'.format(
-                            args.ctl_depth_ratio))
+                        f'Number of reads in controls differ by a factor of {args.ctl_depth_ratio}.Using pooled controls.'
+                    )
+
                     break
 
         if use_pooled_ctl:
@@ -134,9 +134,9 @@ def main():
                     ctl_ta_idx[i] = -1  # use pooled control
                 elif depths_ctl[i] < depths[i]:
                     log.info(
-                        'Fewer reads in control {} than experiment replicate '
-                        '{}. Using pooled control for replicate {}.'.format(
-                            i+1, i+1, i+1))
+                        f'Fewer reads in control {i + 1} than experiment replicate {i + 1}. Using pooled control for replicate {i + 1}.'
+                    )
+
                     ctl_ta_idx[i] = -1  # use pooled control
                 else:
                     ctl_ta_idx[i] = i
@@ -146,8 +146,8 @@ def main():
     if args.exp_ctl_depth_ratio_limit or args.ctl_depth_limit:
         # subsampling chosen control for each replicate
         for rep in range(num_rep):
-            chosen_ctl = ctl_ta_idx[rep]
             depth = depths[rep]
+            chosen_ctl = ctl_ta_idx[rep]
             depth_ctl = depths_ctl[chosen_ctl]
             limit = int(max(depth * args.exp_ctl_depth_ratio_limit, args.ctl_depth_limit))
             if depth_ctl > limit:

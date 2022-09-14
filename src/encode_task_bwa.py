@@ -80,7 +80,7 @@ def parse_arguments():
 def bwa_aln(fastq, ref_index_prefix, nth, out_dir):
     basename = os.path.basename(strip_ext_fastq(fastq))
     prefix = os.path.join(out_dir, basename)
-    sai = '{}.sai'.format(prefix)
+    sai = f'{prefix}.sai'
 
     cmd = 'bwa aln -q 5 -l 32 -k 2 -t {nth} {ref} {fastq} > {sai}'.format(
         nth=nth,
@@ -94,7 +94,7 @@ def bwa_aln(fastq, ref_index_prefix, nth, out_dir):
 def bwa_se(fastq, ref_index_prefix, nth, mem_gb, out_dir):
     basename = os.path.basename(strip_ext_fastq(fastq))
     prefix = os.path.join(out_dir, basename)
-    tmp_bam = '{}.bam'.format(prefix)
+    tmp_bam = f'{prefix}.bam'
 
     sai = bwa_aln(fastq, ref_index_prefix, nth, out_dir)
 
@@ -120,9 +120,9 @@ def bwa_pe(fastq1, fastq2, ref_index_prefix, nth, mem_gb, use_bwa_mem_for_pe,
            bwa_mem_read_len_limit, rescue_reads_for_bwa_mem, out_dir):
     basename = os.path.basename(strip_ext_fastq(fastq1))
     prefix = os.path.join(out_dir, basename)
-    sam = '{}.sam'.format(prefix)
-    badcigar = '{}.badReads'.format(prefix)
-    bam = '{}.bam'.format(prefix)
+    sam = f'{prefix}.sam'
+    badcigar = f'{prefix}.badReads'
+    bam = f'{prefix}.bam'
 
     temp_files = []
     read_len = get_read_length(fastq1)
@@ -202,10 +202,9 @@ def bwa_pe(fastq1, fastq2, ref_index_prefix, nth, mem_gb, use_bwa_mem_for_pe,
 
 
 def chk_bwa_index(prefix):
-    index_sa = '{}.sa'.format(prefix)
+    index_sa = f'{prefix}.sa'
     if not os.path.exists(index_sa):
-        raise Exception("bwa index does not exists. " +
-                        "Prefix = {}".format(prefix))
+        raise Exception(f"bwa index does not exists. Prefix = {prefix}")
 
 
 def find_bwa_index_prefix(d):
@@ -217,10 +216,10 @@ def find_bwa_index_prefix(d):
     """
     if d == '':
         d = '.'
-    for f in os.listdir(d):
-        if f.endswith('.sa'):
-            return re.sub('\.sa$', '', f)
-    return None
+    return next(
+        (re.sub('\.sa$', '', f) for f in os.listdir(d) if f.endswith('.sa')),
+        None,
+    )
 
 
 def main():
@@ -241,8 +240,7 @@ def main():
         # untar
         untar(tar, args.out_dir)
         bwa_index_prefix = find_bwa_index_prefix(args.out_dir)
-        temp_files.append('{}*'.format(
-            bwa_index_prefix))
+        temp_files.append(f'{bwa_index_prefix}*')
     else:
         bwa_index_prefix = args.bwa_index_prefix_or_tar
 

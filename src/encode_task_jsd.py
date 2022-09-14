@@ -57,8 +57,8 @@ def fingerprint(bams, ctl_bam, blacklist, mapq_thresh, nth, out_dir):
 
     prefix = os.path.join(out_dir,
                           os.path.basename(strip_ext_bam(bams[0])))
-    plot_png = '{}.jsd_plot.png'.format(prefix)
-    tmp_log = '{}.jsd.tmp'.format(prefix)
+    plot_png = f'{prefix}.jsd_plot.png'
+    tmp_log = f'{prefix}.jsd.tmp'
 
     labels = []
     bam_paths = []
@@ -66,8 +66,8 @@ def fingerprint(bams, ctl_bam, blacklist, mapq_thresh, nth, out_dir):
     for i, bam in enumerate(filtered_bams):
         prefix_ = os.path.join(out_dir,
                                os.path.basename(strip_ext_bam(bam)))
-        jsd_qcs.append('rep{}.{}.jsd.qc'.format(i+1, prefix_))
-        labels.append('rep{}'.format(i+1))  # repN
+        jsd_qcs.append(f'rep{i + 1}.{prefix_}.jsd.qc')
+        labels.append(f'rep{i + 1}')
         bam_paths.append(bam)
     # add control
     if filtered_ctl_bam:
@@ -76,7 +76,7 @@ def fingerprint(bams, ctl_bam, blacklist, mapq_thresh, nth, out_dir):
 
     cmd = 'LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 plotFingerprint -b {} '
     if filtered_ctl_bam:
-        cmd += '--JSDsample {} '.format(filtered_ctl_bam)
+        cmd += f'--JSDsample {filtered_ctl_bam} '
     cmd += '--labels {} '
     cmd += '--outQualityMetrics {} '
     cmd += '--minMappingQuality {} '

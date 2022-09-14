@@ -71,21 +71,19 @@ def macs2_signal_track(ta, ctl_ta, chrsz, gensz, pval_thresh, shift, fraglen,
                     non_mito=False, mito_chr_name=None,
                     out_dir=out_dir)
         basename_ctl_ta = os.path.basename(strip_ext_ta(ctl_ta))
-        basename_prefix = '{}_x_{}'.format(basename_ta, basename_ctl_ta)
+        basename_prefix = f'{basename_ta}_x_{basename_ctl_ta}'
         if len(basename_prefix) > 200:  # UNIX cannot have len(filename) > 255
-            basename_prefix = '{}_x_control'.format(basename_ta)
+            basename_prefix = f'{basename_ta}_x_control'
     else:
         basename_prefix = basename_ta
     prefix = os.path.join(out_dir, basename_prefix)
-    fc_bigwig = '{}.fc.signal.bigwig'.format(prefix)
-    pval_bigwig = '{}.pval.signal.bigwig'.format(prefix)
+    fc_bigwig = f'{prefix}.fc.signal.bigwig'
+    pval_bigwig = f'{prefix}.pval.signal.bigwig'
     # temporary files
-    fc_bedgraph = '{}.fc.signal.bedgraph'.format(prefix)
-    fc_bedgraph_srt = '{}.fc.signal.srt.bedgraph'.format(prefix)
-    pval_bedgraph = '{}.pval.signal.bedgraph'.format(prefix)
-    pval_bedgraph_srt = '{}.pval.signal.srt.bedgraph'.format(prefix)
-
-    temp_files = []
+    fc_bedgraph = f'{prefix}.fc.signal.bedgraph'
+    fc_bedgraph_srt = f'{prefix}.fc.signal.srt.bedgraph'
+    pval_bedgraph = f'{prefix}.pval.signal.bedgraph'
+    pval_bedgraph_srt = f'{prefix}.pval.signal.srt.bedgraph'
 
     run_shell_cmd(
         ' macs2 callpeak '
@@ -185,8 +183,7 @@ def macs2_signal_track(ta, ctl_ta, chrsz, gensz, pval_thresh, shift, fraglen,
     )
     rm_f(pval_bedgraph_srt)
 
-    # remove temporary files
-    temp_files.append("{prefix}_*".format(prefix=prefix))
+    temp_files = ["{prefix}_*".format(prefix=prefix)]
     rm_f(temp_files)
 
     return fc_bigwig, pval_bigwig

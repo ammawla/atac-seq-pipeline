@@ -40,10 +40,10 @@ def parse_arguments():
 def spr_se(ta, pseudoreplication_random_seed, out_dir):
     prefix = os.path.join(out_dir,
                           os.path.basename(strip_ext_ta(ta)))
-    tmp_pr1 = '{}.00'.format(prefix)
-    tmp_pr2 = '{}.01'.format(prefix)
-    ta_pr1 = '{}.pr1.tagAlign.gz'.format(prefix)
-    ta_pr2 = '{}.pr2.tagAlign.gz'.format(prefix)
+    tmp_pr1 = f'{prefix}.00'
+    tmp_pr2 = f'{prefix}.01'
+    ta_pr1 = f'{prefix}.pr1.tagAlign.gz'
+    ta_pr2 = f'{prefix}.pr2.tagAlign.gz'
     nlines = int((get_num_lines(ta)+1)/2)
 
     if pseudoreplication_random_seed == 0:
@@ -84,10 +84,10 @@ def spr_se(ta, pseudoreplication_random_seed, out_dir):
 def spr_pe(ta, pseudoreplication_random_seed, out_dir):
     prefix = os.path.join(out_dir,
                           os.path.basename(strip_ext_ta(ta)))
-    tmp_pr1 = '{}.00'.format(prefix)
-    tmp_pr2 = '{}.01'.format(prefix)
-    ta_pr1 = '{}.pr1.tagAlign.gz'.format(prefix)
-    ta_pr2 = '{}.pr2.tagAlign.gz'.format(prefix)
+    tmp_pr1 = f'{prefix}.00'
+    tmp_pr2 = f'{prefix}.01'
+    ta_pr1 = f'{prefix}.pr1.tagAlign.gz'
+    ta_pr2 = f'{prefix}.pr2.tagAlign.gz'
     nlines = int((get_num_lines(ta)/2+1)/2)
 
     if pseudoreplication_random_seed == 0:

@@ -34,13 +34,11 @@ def remove_chrs_from_bam(bam, chrs, chrsz, nth=1, out_dir=''):
 
     prefix = os.path.join(out_dir,
                           os.path.basename(strip_ext_bam(bam)))
-    suffix = 'no_{}'.format('_'.join(chrs))
-    final_bam = '{}.{}.bam'.format(prefix, suffix)
-    tmp_chrsz = '{}.{}.tmp.chrsz'.format(prefix, suffix)
+    suffix = f"no_{'_'.join(chrs)}"
+    final_bam = f'{prefix}.{suffix}.bam'
+    tmp_chrsz = f'{prefix}.{suffix}.tmp.chrsz'
 
-    # make a temp chrsz file
-    cmd0 = 'zcat -f {chrsz} |'
-    cmd0 += 'grep -v -P \'^({chrs})\\s\' | '
+    cmd0 = 'zcat -f {chrsz} |' + 'grep -v -P \'^({chrs})\\s\' | '
     cmd0 += 'awk \'BEGIN{{OFS="\\t"}} {{print $1,0,$2}}\' > {tmp_chrsz}'
     cmd0 = cmd0.format(
         chrsz=chrsz,
@@ -64,7 +62,7 @@ def remove_chrs_from_bam(bam, chrs, chrsz, nth=1, out_dir=''):
 def samstat(bam, nth=1, mem_gb=None, out_dir=''):
     prefix = os.path.join(out_dir,
                           os.path.basename(strip_ext_bam(bam)))
-    samstat_qc = '{}.samstats.qc'.format(prefix)
+    samstat_qc = f'{prefix}.samstats.qc'
 
     run_shell_cmd(
         'samtools sort -n {bam} -T {prefix}.tmp {res_param} -O sam | '
@@ -79,7 +77,7 @@ def samstat(bam, nth=1, mem_gb=None, out_dir=''):
 
 
 def samtools_index(bam, nth=1, out_dir=''):
-    bai = '{}.bai'.format(bam)
+    bai = f'{bam}.bai'
     run_shell_cmd(
         'samtools index {bam} {res_param}'.format(
             bam=bam,
@@ -115,23 +113,22 @@ def get_samtools_res_param(subcmd, nth=1, mem_gb=None):
         mem_gb:
             Total memory in GBs.
     """
-    res_param = ''
-    if subcmd == 'index':
-        res_param += '-@ {num_total_threads} '.format(
+    res_param = '' + (
+        '-@ {num_total_threads} '.format(
             num_total_threads=nth,
         )
-    else:
-        res_param += '-@ {num_additional_threads} '.format(
+        if subcmd == 'index'
+        else '-@ {num_additional_threads} '.format(
             num_additional_threads=nth - 1,
         )
+    )
 
-    if subcmd == 'sort':
-        if nth and mem_gb:
-            mem_mb_per_thread = min(
-                math.floor(mem_gb * 1024.0 / nth),
-                DEFAULT_SAMTOOLS_MAX_MEM_MB_PER_THREAD
-            )
-            res_param += '-m {mem}M '.format(mem=mem_mb_per_thread)
+    if subcmd == 'sort' and nth and mem_gb:
+        mem_mb_per_thread = min(
+            math.floor(mem_gb * 1024.0 / nth),
+            DEFAULT_SAMTOOLS_MAX_MEM_MB_PER_THREAD
+        )
+        res_param += '-m {mem}M '.format(mem=mem_mb_per_thread)
 
     return res_param
 
@@ -139,7 +136,7 @@ def get_samtools_res_param(subcmd, nth=1, mem_gb=None):
 def samtools_sort(bam, nth=1, mem_gb=None, out_dir=''):
     prefix = os.path.join(out_dir,
                           os.path.basename(strip_ext_bam(bam)))
-    srt_bam = '{}.srt.bam'.format(prefix)
+    srt_bam = f'{prefix}.srt.bam'
 
     run_shell_cmd(
         'samtools sort {bam} -o {srt_bam} -T {prefix} {res_param}'.format(
@@ -155,7 +152,7 @@ def samtools_sort(bam, nth=1, mem_gb=None, out_dir=''):
 def samtools_name_sort(bam, nth=1, mem_gb=None, out_dir=''):
     prefix = os.path.join(out_dir,
                           os.path.basename(strip_ext_bam(bam)))
-    nmsrt_bam = '{}.nmsrt.bam'.format(prefix)
+    nmsrt_bam = f'{prefix}.nmsrt.bam'
 
     run_shell_cmd(
         'samtools sort -n {bam} -o {nmsrt_bam} -T {prefix} {res_param}'.format(
@@ -188,17 +185,15 @@ def locate_picard():
             # to the folder containing picard.jar
             cmd = 'which picard'
             picard = run_shell_cmd(cmd)
-            ret = os.path.realpath(picard) + '.jar'
+            ret = f'{os.path.realpath(picard)}.jar'
             if os.path.isfile(ret) and os.access(ret, os.R_OK):
                 return ret
-            else:
-                msg = 'Potential bioconda installation of Picard tools'
-                msg += ' located at:\n'
-                msg += picard + '\n'
-                msg += 'but the associated jar file:\n'
-                msg += ret + '\n'
-                msg += 'cannot be found.'
-                raise Exception(msg)
+            msg = 'Potential bioconda installation of Picard tools' + ' located at:\n'
+            msg += picard + '\n'
+            msg += 'but the associated jar file:\n'
+            msg += ret + '\n'
+            msg += 'cannot be found.'
+            raise Exception(msg)
         except:
             msg = 'Cannot find picard.jar or conda installation '\
                   'of Picard tools'
@@ -217,17 +212,15 @@ def locate_trimmomatic():
             # to the folder containing trimmomatic.jar
             cmd = 'which trimmomatic'
             trimmomatic = run_shell_cmd(cmd)
-            ret = os.path.realpath(trimmomatic) + '.jar'
+            ret = f'{os.path.realpath(trimmomatic)}.jar'
             if os.path.isfile(ret) and os.access(ret, os.R_OK):
                 return ret
-            else:
-                msg = 'Potential bioconda installation of trimmomatic'
-                msg += ' located at:\n'
-                msg += trimmomatic + '\n'
-                msg += 'but the associated jar file:\n'
-                msg += ret + '\n'
-                msg += 'cannot be found.'
-                raise Exception(msg)
+            msg = 'Potential bioconda installation of trimmomatic' + ' located at:\n'
+            msg += trimmomatic + '\n'
+            msg += 'but the associated jar file:\n'
+            msg += ret + '\n'
+            msg += 'cannot be found.'
+            raise Exception(msg)
         except:
             msg = 'Cannot find trimmomatic.jar or conda installation '\
                   'of trimmomatic'
@@ -237,11 +230,8 @@ def locate_trimmomatic():
 def subsample_ta_se(ta, subsample, non_mito, mito_chr_name, out_dir):
     prefix = os.path.join(out_dir,
                           os.path.basename(strip_ext_ta(ta)))
-    ta_subsampled = '{}.{}{}tagAlign.gz'.format(
-        prefix,
-        'no_chrM.' if non_mito else '',
-        '{}.'.format(human_readable_number(subsample)) if subsample > 0 else ''
-    )
+    ta_subsampled = f"{prefix}.{'no_chrM.' if non_mito else ''}{f'{human_readable_number(subsample)}.' if subsample > 0 else ''}tagAlign.gz"
+
 
     # bash-only
     cmd = 'zcat -f {} | '
@@ -275,13 +265,9 @@ def subsample_ta_pe(ta, subsample, non_mito, mito_chr_name, r1_only, out_dir):
         raise ValueError(
             'Number of reads to subsample should be an even number '
             'for paired end TAG-ALIGN (BED) file. n={n}'.format(n=subsample))
-    ta_subsampled = '{}.{}{}{}tagAlign.gz'.format(
-        prefix,
-        'no_chrM.' if non_mito else '',
-        'R1.' if r1_only else '',
-        '{}.'.format(human_readable_number(subsample)) if subsample > 0 else ''
-    )
-    ta_tmp = '{}.tagAlign.tmp'.format(prefix)
+    ta_subsampled = f"{prefix}.{'no_chrM.' if non_mito else ''}{'R1.' if r1_only else ''}{f'{human_readable_number(subsample)}.' if subsample > 0 else ''}tagAlign.gz"
+
+    ta_tmp = f'{prefix}.tagAlign.tmp'
 
     cmd0 = 'zcat -f {} | '
     if non_mito:
@@ -305,13 +291,11 @@ def subsample_ta_pe(ta, subsample, non_mito, mito_chr_name, r1_only, out_dir):
 
     run_shell_cmd(cmd0)
 
-    cmd = 'cat {} | '
-    cmd += 'awk \'BEGIN{{OFS="\\t"}} '
+    cmd = 'cat {} | ' + 'awk \'BEGIN{{OFS="\\t"}} '
+    cmd += '{{printf "%s\\t%s\\t%s\\t%s\\t%s\\t%s\\n'
     if r1_only:
-        cmd += '{{printf "%s\\t%s\\t%s\\t%s\\t%s\\t%s\\n'
         cmd += '",$1,$2,$3,$4,$5,$6}}\' | '
     else:
-        cmd += '{{printf "%s\\t%s\\t%s\\t%s\\t%s\\t%s\\n'
         cmd += '%s\\t%s\\t%s\\t%s\\t%s\\t%s\\n",'
         cmd += '$1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12}}\' | '
     cmd += 'gzip -nc > {}'
@@ -329,11 +313,11 @@ def peak_to_hammock(peak, mem_gb, out_dir):
     peak_type = get_peak_type(peak)
     prefix = os.path.join(out_dir, os.path.basename(
         strip_ext_peak(peak)))
-    hammock = '{}.{}.hammock'.format(prefix, peak_type)
-    hammock_tmp = '{}.tmp'.format(hammock)
-    hammock_tmp2 = '{}.tmp2'.format(hammock)
-    hammock_gz = '{}.gz'.format(hammock)
-    hammock_gz_tbi = '{}.gz.tbi'.format(hammock)
+    hammock = f'{prefix}.{peak_type}.hammock'
+    hammock_tmp = f'{hammock}.tmp'
+    hammock_tmp2 = f'{hammock}.tmp2'
+    hammock_gz = f'{hammock}.gz'
+    hammock_gz_tbi = f'{hammock}.gz.tbi'
 
     if get_num_lines(peak) == 0:
         run_shell_cmd(
@@ -358,11 +342,10 @@ def peak_to_hammock(peak, mem_gb, out_dir):
         )
 
         with open(hammock_tmp, 'r') as fin, open(hammock_tmp2, 'w') as fout:
-            id = 1
-            for line in fin:
+            for id, line in enumerate(fin, start=1):
                 lst = line.rstrip().split('\t')
 
-                if peak_type == 'narrowPeak' or peak_type == 'regionPeak':
+                if peak_type in ['narrowPeak', 'regionPeak']:
                     fout.write(
                         '{0[0]}\t{0[1]}\t{0[2]}\tscorelst:[{0[6]},{0[7]},'
                         '{0[8]}],id:{1},'.format(lst, id))
@@ -371,7 +354,7 @@ def peak_to_hammock(peak, mem_gb, out_dir):
                     if lst[5] != '.':
                         fout.write('strand:"'+lst[5]+'",')
                     if lst[9] != '-1':
-                        fout.write('sbstroke:['+lst[9]+']')
+                        fout.write(f'sbstroke:[{lst[9]}]')
                 elif peak_type == 'gappedPeak':
                     fout.write(
                         '{0[0]}\t{0[1]}\t{0[2]}\tscorelst:[{0[12]},{0[13]},'
@@ -398,9 +381,7 @@ def peak_to_hammock(peak, mem_gb, out_dir):
                     if lst[5] != '.':
                         fout.write('strand:"'+lst[5]+'",')
                 else:
-                    raise Exception("Unsupported peak_type {}".format(peak))
-                id += 1
-
+                    raise Exception(f"Unsupported peak_type {peak}")
                 fout.write('\n')
 
         run_shell_cmd(
@@ -430,7 +411,7 @@ def peak_to_starch(peak, out_dir):
     prefix = os.path.join(
         out_dir, os.path.basename(strip_ext_gz(peak))
     )
-    starch = '{}.starch'.format(prefix)
+    starch = f'{prefix}.starch'
     run_shell_cmd(
         'zcat -f {peak} | sort-bed - | starch - > {starch}'.format(
             peak=peak,
@@ -447,7 +428,7 @@ def starch_to_bed_gz(starch, out_dir):
     prefix = os.path.join(
         out_dir, os.path.basename(strip_ext(starch))
     )
-    bed_gz = '{}.bed.gz'.format(prefix)
+    bed_gz = f'{prefix}.bed.gz'
     run_shell_cmd(
         'unstarch {starch} | gzip -nc > {bed_gz}'.format(
             starch=starch,
@@ -460,13 +441,13 @@ def starch_to_bed_gz(starch, out_dir):
 def peak_to_bigbed(peak, peak_type, chrsz, mem_gb, out_dir):
     prefix = os.path.join(out_dir,
                           os.path.basename(strip_ext(peak)))
-    bigbed = '{}.{}.bb'.format(prefix, peak_type)
-    as_file = '{}.as'.format(prefix)
-    chrsz_tmp = '{}.chrsz.tmp'.format(prefix)
-    bigbed_tmp = '{}.bb.tmp'.format(prefix)
-    bigbed_tmp2 = '{}.bb.tmp2'.format(prefix)
+    bigbed = f'{prefix}.{peak_type}.bb'
+    as_file = f'{prefix}.as'
+    chrsz_tmp = f'{prefix}.chrsz.tmp'
+    bigbed_tmp = f'{prefix}.bb.tmp'
+    bigbed_tmp2 = f'{prefix}.bb.tmp2'
 
-    if peak_type.lower() == 'narrowpeak' or peak_type.lower() == 'regionpeak':
+    if peak_type.lower() in ['narrowpeak', 'regionpeak']:
         as_file_contents = '''table narrowPeak
 "BED6+4 Peaks of signal enrichment based on pooled, normalized (interpreted) data."
 (
@@ -597,10 +578,13 @@ def get_read_length(fastq):
 def remove_read_group(bam, out_dir='.'):
     basename = os.path.basename(strip_ext_bam(bam))
     prefix = os.path.join(out_dir, basename)
-    new_bam = '{}.no_rg.bam'.format(prefix)
+    new_bam = f'{prefix}.no_rg.bam'
 
-    cmd = 'samtools view -h {} | '
-    cmd += 'grep -v "^@RG" | sed "s/\\tRG:Z:[^\\t]*//" | '
+    cmd = (
+        'samtools view -h {} | '
+        + 'grep -v "^@RG" | sed "s/\\tRG:Z:[^\\t]*//" | '
+    )
+
     cmd += 'samtools view -bo {} -'
     cmd = cmd.format(bam, new_bam)
     run_shell_cmd(cmd)
@@ -622,8 +606,8 @@ def get_region_size_metrics(peak_file, out_dir='.'):
 
     basename = os.path.basename(strip_ext_peak(peak_file))
     prefix = os.path.join(out_dir, basename)
-    log = '{}.peak_region_size.qc'.format(prefix)
-    plot = '{}.peak_region_size.png'.format(prefix)
+    log = f'{prefix}.peak_region_size.qc'
+    plot = f'{prefix}.peak_region_size.png'
 
     # Load peak file. If it fails, return nothing as above
     peak_df = pd.read_table(peak_file, compression='gzip', header=None)
@@ -671,7 +655,7 @@ def get_num_peaks(peak_file, out_dir='.'):
     '''
     basename = os.path.basename(strip_ext_peak(peak_file))
     prefix = os.path.join(out_dir, basename)
-    log = '{}.num_peak.qc'.format(prefix)
+    log = f'{prefix}.num_peak.qc'
 
     with open(log, 'w') as fp:
         fp.write(str(get_num_lines(peak_file))+'\n')
@@ -685,10 +669,7 @@ def determine_paired(bam):
     num_paired_reads = int(subprocess.check_output(['samtools',
                                                     'view', '-f', '0x1',
                                                     '-c', bam]).strip())
-    if num_paired_reads > 1:
-        return True
-    else:
-        return False
+    return num_paired_reads > 1
 
 
 def bed_clip(bed, chrsz, out_clipped_bed, no_gz=False):
@@ -702,7 +683,7 @@ def bed_clip(bed, chrsz, out_clipped_bed, no_gz=False):
         no_gz:
             Do not gzip output.
     '''
-    tmp_out = out_clipped_bed +  '.clip_tmp'
+    tmp_out = f'{out_clipped_bed}.clip_tmp'
     cmd = 'bedClip {bed} {chrsz} {tmp_out} -truncate -verbose=2'.format(
         bed=bed,
         chrsz=chrsz,
@@ -730,15 +711,14 @@ def bam_to_pbam(bam, ref_fa, out_dir='.'):
         os.path.basename(strip_ext_bam(bam))
     )
 
-    pbam_tmp = '{}.sorted.p.bam'.format(prefix)
-    pbam = '{}.p.bam'.format(prefix)
+    pbam_tmp = f'{prefix}.sorted.p.bam'
+    pbam = f'{prefix}.p.bam'
 
     temp_files = []
 
     if ref_fa.endswith('.gz'):
-        gunzipped_ref_fa = '{}.fasta'.format(
-            os.path.join(out_dir, os.path.basename(strip_ext_gz(ref_fa)))
-        )
+        gunzipped_ref_fa = f'{os.path.join(out_dir, os.path.basename(strip_ext_gz(ref_fa)))}.fasta'
+
         run_shell_cmd(
             'zcat -f {ref_fa} > {gunzipped_ref_fa}'.format(
                 ref_fa=ref_fa,

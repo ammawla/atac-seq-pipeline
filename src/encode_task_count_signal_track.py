@@ -38,13 +38,11 @@ def parse_arguments():
 
 def count_signal_track(ta, chrsz, mem_gb, out_dir):
     prefix = os.path.join(out_dir, os.path.basename(strip_ext_ta(ta)))
-    pos_bw = '{}.positive.bigwig'.format(prefix)
-    neg_bw = '{}.negative.bigwig'.format(prefix)
+    pos_bw = f'{prefix}.positive.bigwig'
+    neg_bw = f'{prefix}.negative.bigwig'
     # temporary files
-    pos_bedgraph = '{}.positive.bedgraph'.format(prefix)
-    neg_bedgraph = '{}.negative.bedgraph'.format(prefix)
-
-    temp_files = []
+    pos_bedgraph = f'{prefix}.positive.bedgraph'
+    neg_bedgraph = f'{prefix}.negative.bedgraph'
 
     run_shell_cmd(
         'zcat -f {ta} | sort -k1,1 -k2,2n {sort_param} | '
@@ -82,9 +80,7 @@ def count_signal_track(ta, chrsz, mem_gb, out_dir):
         )
     )
 
-    # remove temporary files
-    temp_files.append(pos_bedgraph)
-    temp_files.append(neg_bedgraph)
+    temp_files = [pos_bedgraph, neg_bedgraph]
     rm_f(temp_files)
 
     return pos_bw, neg_bw

@@ -95,7 +95,7 @@ def main():
         conservative_set = label_tr
         conservative_peak = args.peaks[Nt_idx]
         N_conservative = Nt
-        if Nt > Np:
+        if N_conservative > Np:
             optimal_set = conservative_set
             optimal_peak = conservative_peak
             N_optimal = N_conservative
@@ -127,13 +127,15 @@ def main():
 
     log.info('Writing optimal/conservative peak files...')
     optimal_peak_file = os.path.join(
-        args.out_dir, '{}optimal_peak.{}.gz'.format(
-            (args.prefix + '.') if args.prefix else '',
-            args.peak_type))
+        args.out_dir,
+        f"{f'{args.prefix}.' if args.prefix else ''}optimal_peak.{args.peak_type}.gz",
+    )
+
     conservative_peak_file = os.path.join(
-        args.out_dir, '{}conservative_peak.{}.gz'.format(
-            (args.prefix + '.') if args.prefix else '',
-            args.peak_type))
+        args.out_dir,
+        f"{f'{args.prefix}.' if args.prefix else ''}conservative_peak.{args.peak_type}.gz",
+    )
+
     copy_f_to_f(optimal_peak, optimal_peak_file)
     copy_f_to_f(conservative_peak, conservative_peak_file)
 
@@ -158,7 +160,7 @@ def main():
 
     log.info('Writing reproducibility QC log...')
     if args.prefix:
-        reproducibility_qc = '{}.reproducibility.qc'.format(args.prefix)
+        reproducibility_qc = f'{args.prefix}.reproducibility.qc'
     else:
         reproducibility_qc = 'reproducibility.qc'
     reproducibility_qc = os.path.join(args.out_dir, reproducibility_qc)
@@ -166,7 +168,7 @@ def main():
     with open(reproducibility_qc, 'w') as fp:
         header = '{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n'.format(
             'Nt',
-            '\t'.join(['N{}'.format(i+1) for i in range(num_rep)]),
+            '\t'.join([f'N{i + 1}' for i in range(num_rep)]),
             'Np',
             'N_opt',
             'N_consv',
@@ -176,6 +178,7 @@ def main():
             'self_consistency_ratio',
             'reproducibility',
         )
+
         line = '{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n'.format(
             Nt,
             '\t'.join([str(i) for i in N]),

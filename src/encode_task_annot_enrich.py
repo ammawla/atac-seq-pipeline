@@ -39,9 +39,7 @@ def get_fract_reads_in_regions(reads_bed, regions_bed):
     """Function that takes in bed file of reads and bed file of regions and
     gets fraction of reads sitting in said regions
     """
-    # uses new run_shell_cmd
-    cmd = "bedtools sort -i {}  | "
-    cmd += "bedtools merge -i stdin | "
+    cmd = "bedtools sort -i {}  | " + "bedtools merge -i stdin | "
     cmd += "bedtools intersect -u -nonamecheck -a {} -b stdin | "
     cmd += "wc -l"
     cmd = cmd.format(regions_bed, reads_bed)
@@ -94,7 +92,7 @@ def main():
         result.append(('fraction_of_reads_in_enhancer_regions',
                        str(reads_enh), str(fract_enh)))
 
-    annot_enrich_qc = OUTPUT_PREFIX + '.annot_enrich.qc'
+    annot_enrich_qc = f'{OUTPUT_PREFIX}.annot_enrich.qc'
     with open(annot_enrich_qc, 'w') as fp:
         for line in result:
             fp.write('\t'.join(line) + '\n')

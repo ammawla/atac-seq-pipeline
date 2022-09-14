@@ -64,20 +64,21 @@ def spp(ta, ctl_ta, chrsz, fraglen, cap_num_peak, fdr_thresh,
                 non_mito=False, mito_chr_name=None,
                 out_dir=out_dir)
     basename_ctl_ta = os.path.basename(strip_ext_ta(ctl_ta))
-    basename_prefix = '{}_x_{}'.format(basename_ta, basename_ctl_ta)
+    basename_prefix = f'{basename_ta}_x_{basename_ctl_ta}'
     if len(basename_prefix) > 200:  # UNIX cannot have filename > 255
-        basename_prefix = '{}_x_control'.format(basename_ta)
-    nth_param = '-p={}'.format(nth) if nth < 2 else ''
+        basename_prefix = f'{basename_ta}_x_control'
+    nth_param = f'-p={nth}' if nth < 2 else ''
     prefix = os.path.join(out_dir, basename_prefix)
-    rpeak = '{}.{}.regionPeak.gz'.format(
-        prefix,
-        human_readable_number(cap_num_peak))
-    rpeak_tmp_prefix = '{}.tmp'.format(rpeak)
-    rpeak_tmp_gz = '{}.tmp.gz'.format(rpeak)
-    rpeak_tmp2 = '{}.tmp2'.format(rpeak)
+    rpeak = f'{prefix}.{human_readable_number(cap_num_peak)}.regionPeak.gz'
+    rpeak_tmp_prefix = f'{rpeak}.tmp'
+    rpeak_tmp_gz = f'{rpeak}.tmp.gz'
+    rpeak_tmp2 = f'{rpeak}.tmp2'
 
-    cmd0 = 'Rscript --max-ppsize=500000 $(which run_spp.R) -c={} -i={} '
-    cmd0 += '-npeak={} -odir={} -speak={} -savr={} -fdr={} -rf {}'
+    cmd0 = (
+        'Rscript --max-ppsize=500000 $(which run_spp.R) -c={} -i={} '
+        + '-npeak={} -odir={} -speak={} -savr={} -fdr={} -rf {}'
+    )
+
     cmd0 = cmd0.format(
         ta,
         ctl_ta,
@@ -89,9 +90,7 @@ def spp(ta, ctl_ta, chrsz, fraglen, cap_num_peak, fdr_thresh,
         nth_param)
     run_shell_cmd(cmd0)
 
-    # if we have scientific representation of chr coord. then convert it to int
-    cmd1 = 'zcat -f {} | awk \'BEGIN{{OFS="\\t"}}'
-    cmd1 += '{{if ($2<0) $2=0; '
+    cmd1 = 'zcat -f {} | awk \'BEGIN{{OFS="\\t"}}' + '{{if ($2<0) $2=0; '
     cmd1 += 'print $1,int($2),int($3),$4,$5,$6,$7,$8,$9,$10;}}\' > {}'
     cmd1 = cmd1.format(
         rpeak_tmp_gz,

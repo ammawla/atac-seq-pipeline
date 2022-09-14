@@ -77,20 +77,16 @@ def macs2(ta, ctl_ta, chrsz, gensz, pval_thresh, shift, fraglen, cap_num_peak,
                     out_dir=out_dir)
 
         basename_ctl_ta = os.path.basename(strip_ext_ta(ctl_ta))
-        basename_prefix = '{}_x_{}'.format(basename_ta, basename_ctl_ta)
+        basename_prefix = f'{basename_ta}_x_{basename_ctl_ta}'
         if len(basename_prefix) > 200:  # UNIX cannot have len(filename) > 255
-            basename_prefix = '{}_x_control'.format(basename_ta)
+            basename_prefix = f'{basename_ta}_x_control'
     else:
         basename_prefix = basename_ta
     prefix = os.path.join(out_dir, basename_prefix)
-    npeak = '{}.{}.{}.narrowPeak.gz'.format(
-        prefix,
-        'pval{}'.format(pval_thresh),
-        human_readable_number(cap_num_peak))
-    npeak_tmp = '{}.tmp'.format(npeak)
-    npeak_tmp2 = '{}.tmp2'.format(npeak)
-    temp_files = []
+    npeak = f'{prefix}.pval{pval_thresh}.{human_readable_number(cap_num_peak)}.narrowPeak.gz'
 
+    npeak_tmp = f'{npeak}.tmp'
+    npeak_tmp2 = f'{npeak}.tmp2'
     run_shell_cmd(
         ' macs2 callpeak '
         '-t {ta} {ctl_param} -f BED -n {prefix} -g {gensz} -p {pval_thresh} '
@@ -129,8 +125,7 @@ def macs2(ta, ctl_ta, chrsz, gensz, pval_thresh, shift, fraglen, cap_num_peak,
 
     rm_f([npeak_tmp, npeak_tmp2])
 
-    # remove temporary files
-    temp_files.append("{prefix}_*".format(prefix=prefix))
+    temp_files = ["{prefix}_*".format(prefix=prefix)]
     rm_f(temp_files)
 
     return npeak

@@ -65,7 +65,7 @@ def bowtie2_se(fastq, ref_index_prefix,
                multimapping, local, nth, mem_gb, out_dir):
     basename = os.path.basename(strip_ext_fastq(fastq))
     prefix = os.path.join(out_dir, basename)
-    tmp_bam = '{}.bam'.format(prefix)
+    tmp_bam = f'{prefix}.bam'
 
     run_shell_cmd(
         'bowtie2 {multimapping} {mode_param} --mm --threads {nth} -x {ref} '
@@ -88,7 +88,7 @@ def bowtie2_pe(fastq1, fastq2, ref_index_prefix,
                multimapping, local, nth, mem_gb, out_dir):
     basename = os.path.basename(strip_ext_fastq(fastq1))
     prefix = os.path.join(out_dir, basename)
-    tmp_bam = '{}.bam'.format(prefix)
+    tmp_bam = f'{prefix}.bam'
 
     run_shell_cmd(
         'bowtie2 {multimapping} -X2000 {mode_param} --mm --threads {nth} -x {ref} '
@@ -109,11 +109,10 @@ def bowtie2_pe(fastq1, fastq2, ref_index_prefix,
 
 
 def chk_bowtie2_index(prefix):
-    index_1 = '{}.1.bt2'.format(prefix)
-    index_2 = '{}.1.bt2l'.format(prefix)
+    index_1 = f'{prefix}.1.bt2'
+    index_2 = f'{prefix}.1.bt2l'
     if not (os.path.exists(index_1) or os.path.exists(index_2)):
-        raise Exception("Bowtie2 index does not exists. " +
-                        "Prefix = {}".format(prefix))
+        raise Exception(f"Bowtie2 index does not exists. Prefix = {prefix}")
 
 
 def find_bowtie2_index_prefix(d):
@@ -151,8 +150,7 @@ def main():
         # untar
         untar(tar, args.out_dir)
         bowtie2_index_prefix = find_bowtie2_index_prefix(args.out_dir)
-        temp_files.append('{}*'.format(
-            bowtie2_index_prefix))
+        temp_files.append(f'{bowtie2_index_prefix}*')
     else:
         bowtie2_index_prefix = args.bowtie2_index_prefix_or_tar
 

@@ -83,7 +83,7 @@ def naive_overlap(basename_prefix, peak1, peak2, peak_pooled, peak_type,
                   nonamecheck, mem_gb, out_dir):
     prefix = os.path.join(out_dir, basename_prefix)
     prefix += '.overlap'
-    overlap_peak = '{}.{}.gz'.format(prefix, peak_type)
+    overlap_peak = f'{prefix}.{peak_type}.gz'
 
     nonamecheck_param = '-nonamecheck' if nonamecheck else ''
     if peak_type.lower() in ('narrowpeak', 'regionpeak'):

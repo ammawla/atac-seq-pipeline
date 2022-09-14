@@ -82,8 +82,7 @@ def get_peak_type(peak):
     elif strip_ext_gpeak(peak) != peak:
         return 'gappedPeak'
     else:
-        raise Exception(
-            'Unsupported peak type for stripping extension {}'.format(peak))
+        raise Exception(f'Unsupported peak type for stripping extension {peak}')
 
 
 def strip_ext_peak(peak):  # returns a tuple (peak_type, stripped_filename)
@@ -97,9 +96,7 @@ def strip_ext_peak(peak):  # returns a tuple (peak_type, stripped_filename)
     elif peak_type == 'gappedPeak':
         return strip_ext_gpeak(peak)
     else:
-        raise Exception(
-            'Unsupported peak type for stripping '
-            'extension {}'.format(peak))
+        raise Exception(f'Unsupported peak type for stripping extension {peak}')
 
 
 def strip_ext_bigwig(bw):
@@ -114,8 +111,7 @@ def strip_ext_gz(f):
 def strip_ext(f, ext=''):
     if ext == '':
         ext = get_ext(f)
-    return re.sub(r'\.({}|{}\.gz)$'.format(
-        ext, ext), '', str(f))
+    return re.sub(f'\.({ext}|{ext}\.gz)$', '', str(f))
 
 
 def get_ext(f):
@@ -126,17 +122,17 @@ def get_ext(f):
 def human_readable_number(num):
     for unit in ['', 'K', 'M', 'G', 'T', 'P']:
         if abs(num) < 1000:
-            return '{}{}'.format(num, unit)
+            return f'{num}{unit}'
         num = int(num/1000.0)
-    return '{}{}'.format(num, 'E')
+    return f'{num}E'
 
 
 def human_readable_filesize(num):
     for unit in ['', 'KB', 'MB', 'GB', 'TB', 'PB']:
         if abs(num) < 1024.0:
-            return '{}{}'.format(num, unit)
+            return f'{num}{unit}'
         num = int(num/1024.0)
-    return '{}{}'.format(num, 'EB')
+    return f'{num}EB'
 
 
 def read_tsv(tsv):
@@ -164,15 +160,10 @@ def mkdir_p(dirname):
 
 def untar(tar, out_dir):
     if tar.endswith('.gz'):
-        cmd = 'tar zxvf {} --no-same-owner -C {}'.format(
-            tar,
-            out_dir if out_dir else '.')
+        cmd = f"tar zxvf {tar} --no-same-owner -C {out_dir or '.'}"
     else:
         cmd = 'tar xvf {} --no-same-owner -C {}'
-    cmd = cmd.format(
-        tar,
-        out_dir if out_dir else '.'
-    )
+    cmd = cmd.format(tar, out_dir or '.')
     run_shell_cmd(cmd)
 
 
@@ -182,48 +173,45 @@ def gunzip(f, suffix, out_dir):
     gunzipped = os.path.join(out_dir,
                              os.path.basename(strip_ext_gz(f)))
     if suffix:
-        gunzipped += '.{}'.format(suffix)
+        gunzipped += f'.{suffix}'
     # cmd = 'gzip -cd {} > {}'.format(f, gunzipped)
-    cmd = 'zcat -f {} > {}'.format(f, gunzipped)
+    cmd = f'zcat -f {f} > {gunzipped}'
     run_shell_cmd(cmd)
     return gunzipped
 
 
 def ls_l(d):
-    cmd = 'ls -l {}'.format(d)
+    cmd = f'ls -l {d}'
     run_shell_cmd(cmd)
 
 
 def rm_f(files):
     if files:
         if type(files) == list:
-            run_shell_cmd('rm -f {}'.format(' '.join(files)))
+            run_shell_cmd(f"rm -f {' '.join(files)}")
         else:
-            run_shell_cmd('rm -f {}'.format(files))
+            run_shell_cmd(f'rm -f {files}')
 
 
 def touch(f):
-    run_shell_cmd('touch {}'.format(f))
+    run_shell_cmd(f'touch {f}')
 
 
 def get_num_lines(f):
-    cmd = 'zcat -f {} | wc -l'.format(f)
+    cmd = f'zcat -f {f} | wc -l'
     return int(run_shell_cmd(cmd))
 
 
 def assert_file_not_empty(f, help=''):
     if not os.path.exists(f):
-        raise Exception('File does not exist ({}). Help: {}'.format(f, help))
+        raise Exception(f'File does not exist ({f}). Help: {help}')
     elif get_num_lines(f) == 0:
-        raise Exception('File is empty ({}). Help: {}'.format(f, help))
+        raise Exception(f'File is empty ({f}). Help: {help}')
 
 
 def write_txt(f, s):
     with open(f, 'w') as fp:
-        if type(s) != list:
-            arr = [s]
-        else:
-            arr = s
+        arr = [s] if type(s) != list else s
         for a in arr:
             fp.write(str(a)+'\n')
 
@@ -231,7 +219,7 @@ def write_txt(f, s):
 def hard_link(f, link):  # hard-link 'f' to 'link'
     # UNIX only
     if os.path.abspath(f) == os.path.abspath(link):
-        raise Exception('Trying to hard-link itself. {}'.format(f))
+        raise Exception(f'Trying to hard-link itself. {f}')
     os.link(f, link)
     return link
 
@@ -239,7 +227,7 @@ def hard_link(f, link):  # hard-link 'f' to 'link'
 def make_hard_link(f, out_dir):  # hard-link 'f' to 'out_dir'/'f'
     # UNIX only
     if os.path.dirname(f) == os.path.dirname(out_dir):
-        raise Exception('Trying to hard-link itself. {}'.format(f))
+        raise Exception(f'Trying to hard-link itself. {f}')
     linked = os.path.join(out_dir, os.path.basename(f))
     rm_f(linked)
     os.link(f, linked)
@@ -249,7 +237,7 @@ def make_hard_link(f, out_dir):  # hard-link 'f' to 'out_dir'/'f'
 def soft_link(f, link):  # soft-link 'f' to 'link'
     # UNIX only
     if os.path.abspath(f) == os.path.abspath(link):
-        raise Exception('Trying to soft-link itself. {}'.format(f))
+        raise Exception(f'Trying to soft-link itself. {f}')
     os.symlink(f, link)
     return link
 
@@ -257,7 +245,7 @@ def soft_link(f, link):  # soft-link 'f' to 'link'
 def make_soft_link(f, out_dir):  # soft-link 'f' to 'out_dir'/'f'
     # UNIX only
     if os.path.dirname(f) == os.path.dirname(out_dir):
-        raise Exception('Trying to soft-link itself. {}'.format(f))
+        raise Exception(f'Trying to soft-link itself. {f}')
     linked = os.path.join(out_dir, os.path.basename(f))
     rm_f(linked)
     os.symlink(f, linked)
@@ -266,8 +254,8 @@ def make_soft_link(f, out_dir):  # soft-link 'f' to 'out_dir'/'f'
 
 def copy_f_to_f(f, dest):  # copy 'f' to 'out_dir'/'f'
     if os.path.abspath(f) == os.path.abspath(dest):
-        raise Exception('Trying to copy to itself. {}'.format(f))
-    cmd = 'cp -f {} {}'.format(f, dest)
+        raise Exception(f'Trying to copy to itself. {f}')
+    cmd = f'cp -f {f} {dest}'
     run_shell_cmd(cmd)
     return dest
 
@@ -275,7 +263,7 @@ def copy_f_to_f(f, dest):  # copy 'f' to 'out_dir'/'f'
 def copy_f_to_dir(f, out_dir):  # copy 'f' to 'out_dir'/'f'
     out_dir = os.path.abspath(out_dir)
     if not os.path.isdir(out_dir):
-        raise Exception('Invalid destination directory {}.'.format(out_dir))
+        raise Exception(f'Invalid destination directory {out_dir}.')
     dest = os.path.join(out_dir, os.path.basename(f))
     return copy_f_to_f(f, dest)
 
@@ -315,10 +303,13 @@ def now():
 def pdf2png(pdf, out_dir):
     prefix = os.path.join(out_dir,
                           os.path.basename(strip_ext(pdf)))
-    png = '{}.png'.format(prefix)
+    png = f'{prefix}.png'
 
-    cmd = 'gs -dFirstPage=1 -dLastPage=1 -dTextAlphaBits=4 '
-    cmd += '-dGraphicsAlphaBits=4 -r110x110 -dUseCropBox -dQUIET '
+    cmd = (
+        'gs -dFirstPage=1 -dLastPage=1 -dTextAlphaBits=4 '
+        + '-dGraphicsAlphaBits=4 -r110x110 -dUseCropBox -dQUIET '
+    )
+
     cmd += '-dSAFER -dBATCH -dNOPAUSE -dNOPROMPT -sDEVICE=png16m '
     cmd += '-sOutputFile={} -r144 {}'
     cmd = cmd.format(
@@ -338,7 +329,7 @@ def run_shell_cmd(cmd):
         preexec_fn=os.setsid)  # to make a new process with a new PGID
     pid = p.pid
     pgid = os.getpgid(pid)
-    log.info('run_shell_cmd: PID={}, PGID={}, CMD={}'.format(pid, pgid, cmd))
+    log.info(f'run_shell_cmd: PID={pid}, PGID={pgid}, CMD={cmd}')
     t0 = get_ticks()
     stdout, stderr = p.communicate(cmd)
     rc = p.returncode
@@ -369,18 +360,17 @@ def nCr(n, r):  # combination
 
 
 def infer_n_from_nC2(nC2):  # calculate n from nC2
-    if nC2:
-        n = 2
-        while(nCr(n, 2) != nC2):
-            n += 1
-            if n > 99:
-                raise argparse.ArgumentTypeError(
-                    'Cannot infer n from nC2. ' +
-                    'wrong number of peakfiles ' +
-                    'in command line arg. (--peaks)?')
-        return n
-    else:
+    if not nC2:
         return 1
+    n = 2
+    while(nCr(n, 2) != nC2):
+        n += 1
+        if n > 99:
+            raise argparse.ArgumentTypeError(
+                'Cannot infer n from nC2. ' +
+                'wrong number of peakfiles ' +
+                'in command line arg. (--peaks)?')
+    return n
 
 
 def infer_pair_label_from_idx(n, idx, prefix='rep'):
@@ -388,12 +378,11 @@ def infer_pair_label_from_idx(n, idx, prefix='rep'):
     for i in range(n):
         for j in range(i+1, n):
             if idx == cnt:
-                return '{}{}_vs_{}{}'.format(
-                    prefix, i+1, prefix, j+1)
+                return f'{prefix}{i + 1}_vs_{prefix}{j + 1}'
             cnt += 1
     raise argparse.ArgumentTypeError(
         'Cannot infer rep_id from n and idx.')
 
 
 def which(executable):
-    return run_shell_cmd('which {}'.format(executable))
+    return run_shell_cmd(f'which {executable}')
