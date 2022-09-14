@@ -20,10 +20,7 @@ def parse_frac_mito_qc(txt):
     with open(txt, 'r') as fp:
         for line in fp.read().strip('\n').split('\n'):
             k, v = line.split('\t')
-            if k.startswith('frac_'):
-                result[k] = float(v)
-            else:
-                result[k] = int(v)
+            result[k] = float(v) if k.startswith('frac_') else int(v)
     return result
 
 

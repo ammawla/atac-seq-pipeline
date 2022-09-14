@@ -33,8 +33,7 @@ class QCCheck(object):
         return True
 
     def message(self, value, qc_pass):
-        return ('{}\tOK'.format(value) if qc_pass
-                else '{}\tFailed'.format(value))
+        return f'{value}\tOK' if qc_pass else f'{value}\tFailed'
 
     def __call__(self, value):
         qc_pass = self.check(value)
@@ -51,9 +50,11 @@ class QCIntervalCheck(QCCheck):
         return self.lower <= value <= self.upper
 
     def message(self, value, qc_pass):
-        return ('{}\tOK'.format(value) if qc_pass else
-                '{}\tout of range [{}, {}]'.format(value, self.lower,
-                                                   self.upper))
+        return (
+            f'{value}\tOK'
+            if qc_pass
+            else f'{value}\tout of range [{self.lower}, {self.upper}]'
+        )
 
 
 class QCLessThanEqualCheck(QCIntervalCheck):
@@ -77,9 +78,11 @@ class QCHasElementInRange(QCCheck):
                      if self.lower <= elem <= self.upper]) > 0)
 
     def message(self, elems, qc_pass):
-        return ('OK' if qc_pass else
-                'Cannot find element in range [{}, {}]'.format(
-                    self.lower, self.upper))
+        return (
+            'OK'
+            if qc_pass
+            else f'Cannot find element in range [{self.lower}, {self.upper}]'
+        )
 
 
 def parse_arguments():
@@ -117,10 +120,7 @@ def get_insert_distribution(final_bam, prefix, java_heap=None):
     log.info('insert size distribution...')
     insert_data = '{0}.inserts.hist_data.log'.format(prefix)
     insert_plot = '{0}.inserts.hist_graph.pdf'.format(prefix)
-    if java_heap is None:
-        java_heap_param = '-Xmx6G'
-    else:
-        java_heap_param = '-Xmx{}'.format(java_heap)
+    java_heap_param = '-Xmx6G' if java_heap is None else f'-Xmx{java_heap}'
     graph_insert_dist = ('java {4} -XX:ParallelGCThreads=1 -jar '
                          '{3} '
                          'CollectInsertSizeMetrics '
@@ -138,8 +138,6 @@ def get_insert_distribution(final_bam, prefix, java_heap=None):
 
 
 def fragment_length_qc(data, prefix):
-    results = []
-
     NFR_UPPER_LIMIT = 150
     MONO_NUC_LOWER_LIMIT = 150
     MONO_NUC_UPPER_LIMIT = 300
@@ -147,8 +145,9 @@ def fragment_length_qc(data, prefix):
     # % of NFR vs res
     nfr_reads = data[data[:, 0] < NFR_UPPER_LIMIT][:, 1]
     percent_nfr = nfr_reads.sum() / data[:, 1].sum()
-    results.append(
-        QCGreaterThanEqualCheck('Fraction of reads in NFR', 0.4)(percent_nfr))
+    results = [
+        QCGreaterThanEqualCheck('Fraction of reads in NFR', 0.4)(percent_nfr)
+    ]
 
     # % of NFR vs mononucleosome
     mono_nuc_reads = data[
@@ -171,10 +170,12 @@ def fragment_length_qc(data, prefix):
          120 - pos_start_val, 250 - pos_start_val),
         ('Presence of Di-Nuc peak',
          300 - pos_start_val, 500 - pos_start_val)]
-    for range_metric in nuc_range_metrics:
-        results.append(QCHasElementInRange(*range_metric)(peaks))
+    results.extend(
+        QCHasElementInRange(*range_metric)(peaks)
+        for range_metric in nuc_range_metrics
+    )
 
-    out = prefix + '.nucleosomal.qc'
+    out = f'{prefix}.nucleosomal.qc'
     with open(out, 'w') as fp:
         for elem in results:
             fp.write(
@@ -202,8 +203,8 @@ def fragment_length_plot(data_file, prefix, peaks=None):
 
     # plot_img = BytesIO()
     # fig.savefig(plot_img, format='png')
-    plot_pdf = prefix + '.fraglen_dist.pdf'
-    plot_png = prefix + '.fraglen_dist.png'
+    plot_pdf = f'{prefix}.fraglen_dist.pdf'
+    plot_png = f'{prefix}.fraglen_dist.png'
 
     fig.savefig(plot_pdf, format='pdf')
     pdf2png(plot_pdf, os.path.dirname(plot_pdf))

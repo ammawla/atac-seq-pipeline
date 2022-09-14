@@ -38,7 +38,7 @@ def frac_mito(non_mito_samstat, mito_samstat, out_dir):
         out_dir,
         os.path.basename(strip_ext(non_mito_samstat,
                                    'non_mito.samstats.qc')))
-    frac_mito_qc = '{}.frac_mito.qc'.format(prefix)
+    frac_mito_qc = f'{prefix}.frac_mito.qc'
 
     non_mito_samstat_dict = parse_flagstat_qc(non_mito_samstat)
     mito_samstat_dict = parse_flagstat_qc(mito_samstat)
@@ -59,9 +59,9 @@ def frac_mito(non_mito_samstat, mito_samstat, out_dir):
 
     frac = float(Rm)/float(Rn + Rm)
     with open(frac_mito_qc, 'w') as fp:
-        fp.write('non_mito_reads\t{}\n'.format(Rn))
-        fp.write('mito_reads\t{}\n'.format(Rm))
-        fp.write('frac_mito_reads\t{}\n'.format(frac))
+        fp.write(f'non_mito_reads\t{Rn}\n')
+        fp.write(f'mito_reads\t{Rm}\n')
+        fp.write(f'frac_mito_reads\t{frac}\n')
 
     return frac_mito_qc
 

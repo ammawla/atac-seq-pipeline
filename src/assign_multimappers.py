@@ -52,12 +52,10 @@ if __name__ == "__main__":
         if read_elems[0] == current_qname:
             # Add line to current reads
             current_reads.append(line)
-            pass
         else:
             # Discard if there are more than the alignment cutoff
             if len(current_reads) > alignment_cutoff:
                 current_reads = [line]
-                current_qname = read_elems[0]
             elif len(current_reads) > 0:
                 # Just output all reads, which are then filtered with
                 # samtools
@@ -66,8 +64,8 @@ if __name__ == "__main__":
 
                 # And then discard
                 current_reads = [line]
-                current_qname = read_elems[0]
             else:
                 # First read in file
                 current_reads.append(line)
-                current_qname = read_elems[0]
+
+            current_qname = read_elems[0]

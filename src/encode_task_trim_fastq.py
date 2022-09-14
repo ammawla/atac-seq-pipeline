@@ -35,15 +35,16 @@ def parse_arguments(debug=False):
 def trim_fastq(fastq, trim_bp, out_dir):
     prefix = os.path.join(out_dir,
                           os.path.basename(strip_ext_fastq(fastq)))
-    trimmed = '{}.trim_{}bp.fastq.gz'.format(prefix, trim_bp)
+    trimmed = f'{prefix}.trim_{trim_bp}bp.fastq.gz'
 
-    cmd = 'python $(which trimfastq.py) {} {} | gzip -nc > {}'.format(
-        fastq, trim_bp, trimmed)
+    cmd = f'python $(which trimfastq.py) {fastq} {trim_bp} | gzip -nc > {trimmed}'
     run_shell_cmd(cmd)
 
-    # if shorter than trim_bp
-    cmd2 = 'zcat -f {} | (grep \'sequences shorter than desired length\' '
-    cmd2 += '|| true) | wc -l'
+    cmd2 = (
+        'zcat -f {} | (grep \'sequences shorter than desired length\' '
+        + '|| true) | wc -l'
+    )
+
     cmd2 = cmd2.format(
         trimmed)
     if int(run_shell_cmd(cmd2)) > 0:
@@ -59,7 +60,7 @@ def main():
     log.info('Initializing and making output directory...')
     mkdir_p(args.out_dir)
 
-    log.info('Trimming fastqs ({} bp)...'.format(args.trim_bp))
+    log.info(f'Trimming fastqs ({args.trim_bp} bp)...')
     trimmed = trim_fastq(args.fastq, args.trim_bp, args.out_dir)
     assert_file_not_empty(trimmed)
 

@@ -224,11 +224,11 @@ def str2bool(s):
 
 
 def str_rep(i):
-    return 'rep' + str(i + 1)
+    return f'rep{str(i + 1)}'
 
 
 def str_ctl(i):
-    return 'ctl' + str(i + 1)
+    return f'ctl{str(i + 1)}'
 
 
 MAP_KEY_DESC_GENERAL = {
@@ -265,10 +265,10 @@ def make_cat_root(args):
     ])
     if args.paired_ends is not None:
         for i, paired_end in enumerate(args.paired_ends):
-            d_general['seq_endedness']['rep{}'.format(i + 1)] = {'paired_end': paired_end}
+            d_general['seq_endedness'][f'rep{i + 1}'] = {'paired_end': paired_end}
     if args.ctl_paired_ends is not None:
         for i, paired_end in enumerate(args.ctl_paired_ends):
-            d_general['seq_endedness']['ctl{}'.format(i + 1)] = {'paired_end': paired_end}
+            d_general['seq_endedness'][f'ctl{i + 1}'] = {'paired_end': paired_end}
     cat_root.add_log(d_general, key='general')
 
     return cat_root
@@ -569,10 +569,10 @@ def make_cat_replication(args, cat_root):
         qc = args.idr_reproducibility_qc[0]
         cat_reproducibility.add_log(qc, key='idr')
 
-    if args.peak_caller == 'spp':
+    if args.peak_caller == 'macs2':
+        extra_info = f'with p-val threshold {args.pval_thresh}'
+    elif args.peak_caller == 'spp':
         extra_info = 'with FDR 0.01'
-    elif args.peak_caller == 'macs2':
-        extra_info = 'with p-val threshold {}'.format(args.pval_thresh)
     else:
         extra_info = ''
 
@@ -775,11 +775,12 @@ def make_cat_peak_enrich(args, cat_root):
     # raw peaks
     cat_frip_call_peak = QCCategory(
         args.peak_caller,
-        html_head='<h3>FRiP for {} raw peaks</h3>'.format(args.peak_caller),
+        html_head=f'<h3>FRiP for {args.peak_caller} raw peaks</h3>',
         parser=parse_frip_qc,
         map_key_desc=MAP_KEY_DESC_FRIP_QC,
-        parent=cat_frip
+        parent=cat_frip,
     )
+
     if args.frip_qcs:
         for i, qc in enumerate(args.frip_qcs):
             if qc:
@@ -787,11 +788,11 @@ def make_cat_peak_enrich(args, cat_root):
     if args.frip_qcs_pr1:
         for i, qc in enumerate(args.frip_qcs_pr1):
             if qc:
-                cat_frip_call_peak.add_log(qc, key=str_rep(i) + '-pr1')
+                cat_frip_call_peak.add_log(qc, key=f'{str_rep(i)}-pr1')
     if args.frip_qcs_pr2:
         for i, qc in enumerate(args.frip_qcs_pr2):
             if qc:
-                cat_frip_call_peak.add_log(qc, key=str_rep(i) + '-pr2')
+                cat_frip_call_peak.add_log(qc, key=f'{str_rep(i)}-pr2')
     if args.frip_qc_pooled:
         cat_frip_call_peak.add_log(args.frip_qc_pooled[0], key='pooled')
     if args.frip_qc_ppr1:
@@ -918,7 +919,7 @@ def main():
     else:
         match_qc_json_ref = False
 
-    run_shell_cmd('echo {} > qc_json_ref_match.txt'.format(match_qc_json_ref))
+    run_shell_cmd(f'echo {match_qc_json_ref} > qc_json_ref_match.txt')
 
     log.info('All done.')
 

@@ -52,17 +52,13 @@ def macs2(ta, chrsz, gensz, pval_thresh, smooth_win, cap_num_peak,
           mem_gb, out_dir):
     prefix = os.path.join(out_dir,
                           os.path.basename(strip_ext_ta(ta)))
-    npeak = '{}.{}.{}.narrowPeak.gz'.format(
-        prefix,
-        'pval{}'.format(pval_thresh),
-        human_readable_number(cap_num_peak))
+    npeak = f'{prefix}.pval{pval_thresh}.{human_readable_number(cap_num_peak)}.narrowPeak.gz'
+
     # temporary files
-    npeak_tmp = '{}.tmp'.format(npeak)
-    npeak_tmp2 = '{}.tmp2'.format(npeak)
+    npeak_tmp = f'{npeak}.tmp'
+    npeak_tmp2 = f'{npeak}.tmp2'
 
     shiftsize = -int(round(float(smooth_win)/2.0))
-    temp_files = []
-
     run_shell_cmd(
         'macs2 callpeak '
         '-t {ta} -f BED -n {prefix} -g {gensz} -p {pval_thresh} '
@@ -101,8 +97,7 @@ def macs2(ta, chrsz, gensz, pval_thresh, smooth_win, cap_num_peak,
 
     rm_f([npeak_tmp, npeak_tmp2])
 
-    # remove temporary files
-    temp_files.append("{prefix}_*".format(prefix=prefix))
+    temp_files = ["{prefix}_*".format(prefix=prefix)]
     rm_f(temp_files)
 
     return npeak

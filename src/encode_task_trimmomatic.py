@@ -69,11 +69,7 @@ def trimmomatic_se(fastq1, crop_length, crop_length_tol,
     cropped = '{p}.crop_{cl}-{tol}bp.fastq.gz'.format(
         p=prefix, cl=crop_length, tol=crop_length_tol)
 
-    if java_heap is None:
-        java_heap_param = '-Xmx6G'
-    else:
-        java_heap_param = '-Xmx{}'.format(java_heap)
-
+    java_heap_param = '-Xmx6G' if java_heap is None else f'-Xmx{java_heap}'
     phred_score_format = phred_score_format.lower()
     if phred_score_format == 'auto':
         phred_score_param = ''
@@ -115,14 +111,10 @@ def trimmomatic_pe(fastq1, fastq2, crop_length, crop_length_tol,
         p=prefix_R1, cl=crop_length, tol=crop_length_tol)
     cropped_R2 = '{p}.crop_{cl}-{tol}bp.fastq.gz'.format(
         p=prefix_R2, cl=crop_length, tol=crop_length_tol)
-    tmp_cropped_R1 = '{}.tmp'.format(cropped_R1)
-    tmp_cropped_R2 = '{}.tmp'.format(cropped_R2)
+    tmp_cropped_R1 = f'{cropped_R1}.tmp'
+    tmp_cropped_R2 = f'{cropped_R2}.tmp'
 
-    if java_heap is None:
-        java_heap_param = '-Xmx6G'
-    else:
-        java_heap_param = '-Xmx{}'.format(java_heap)
-
+    java_heap_param = '-Xmx6G' if java_heap is None else f'-Xmx{java_heap}'
     phred_score_format = phred_score_format.lower()
     if phred_score_format == 'auto':
         phred_score_param = ''

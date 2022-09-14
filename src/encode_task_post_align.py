@@ -46,7 +46,7 @@ def parse_arguments():
 def make_read_length_file(fastq, out_dir):
     basename = os.path.basename(strip_ext_fastq(fastq))
     prefix = os.path.join(out_dir, basename)
-    txt = '{}.read_length.txt'.format(prefix)
+    txt = f'{prefix}.read_length.txt'
     read_length = get_read_length(fastq)
     with open(txt, 'w') as fp:
         fp.write(str(read_length))

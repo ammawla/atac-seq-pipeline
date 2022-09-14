@@ -40,7 +40,7 @@ def parse_arguments():
 def frip(ta, peak, out_dir):
     prefix = os.path.join(out_dir,
                           os.path.basename(strip_ext(peak)))
-    frip_qc = '{}.frip.qc'.format(prefix)
+    frip_qc = f'{prefix}.frip.qc'
 
     if get_num_lines(peak) == 0:
         val1 = 0.0
@@ -65,7 +65,7 @@ def frip(ta, peak, out_dir):
 def frip_shifted(ta, peak, chrsz, fraglen, out_dir):
     prefix = os.path.join(out_dir,
                           os.path.basename(strip_ext(peak)))
-    frip_qc = '{}.frip.qc'.format(prefix)
+    frip_qc = f'{prefix}.frip.qc'
     half_fraglen = (fraglen+1)/2
 
     if get_num_lines(peak) == 0:
@@ -74,8 +74,7 @@ def frip_shifted(ta, peak, chrsz, fraglen, out_dir):
         # due to bedtools bug when .gz is given for -a and -b
         tmp2 = gunzip(peak, 'tmp2', out_dir)
 
-        cmd = 'bedtools slop -i {} -g {} '
-        cmd += '-s -l {} -r {} | '
+        cmd = 'bedtools slop -i {} -g {} ' + '-s -l {} -r {} | '
         cmd += 'awk \'{{if ($2>=0 && $3>=0 && $2<=$3) print $0}}\' | '
         cmd += 'bedtools intersect -nonamecheck -a stdin -b {} '
         cmd += '-wa -u | wc -l'

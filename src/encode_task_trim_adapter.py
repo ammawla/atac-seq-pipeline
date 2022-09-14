@@ -71,7 +71,7 @@ def parse_arguments(debug=False):
         args.adapters = copy.deepcopy(args.fastqs)
         for i, adapters in enumerate(args.adapters):
             for j, adapter in enumerate(adapters):
-                args.adapters[i][j] = args.adapter if args.adapter else ''
+                args.adapters[i][j] = args.adapter or ''
 
     # check if fastqs, adapers have same/correct dimension
     if len(args.adapters) != len(args.fastqs):
@@ -94,20 +94,16 @@ def parse_arguments(debug=False):
 
 
 def trim_adapter_se(fastq, adapter, adapter_for_all, cutadapt_param, out_dir):
-    if adapter:
-        prefix = os.path.join(out_dir,
-                              os.path.basename(strip_ext_fastq(fastq)))
-        trimmed = '{}.trim.fastq.gz'.format(prefix)
-
-        cmd = 'cutadapt {} -a {} {} | gzip -nc > {}'.format(
-            cutadapt_param,
-            adapter_for_all if adapter_for_all else adapter,
-            fastq,
-            trimmed)
-        run_shell_cmd(cmd)
-        return trimmed
-    else:
+    if not adapter:
         return copy_f_to_dir(fastq, out_dir)
+    prefix = os.path.join(out_dir,
+                          os.path.basename(strip_ext_fastq(fastq)))
+    trimmed = f'{prefix}.trim.fastq.gz'
+
+    cmd = f'cutadapt {cutadapt_param} -a {adapter_for_all or adapter} {fastq} | gzip -nc > {trimmed}'
+
+    run_shell_cmd(cmd)
+    return trimmed
 
 
 def trim_adapter_pe(fastq1, fastq2, adapter1, adapter2, adapter_for_all,
@@ -117,15 +113,11 @@ def trim_adapter_pe(fastq1, fastq2, adapter1, adapter2, adapter_for_all,
                                os.path.basename(strip_ext_fastq(fastq1)))
         prefix2 = os.path.join(out_dir,
                                os.path.basename(strip_ext_fastq(fastq2)))
-        trimmed1 = '{}.trim.fastq.gz'.format(prefix1)
-        trimmed2 = '{}.trim.fastq.gz'.format(prefix2)
+        trimmed1 = f'{prefix1}.trim.fastq.gz'
+        trimmed2 = f'{prefix2}.trim.fastq.gz'
 
-        cmd = 'cutadapt {} -a {} -A {} {} {} -o {} -p {}'.format(
-            cutadapt_param,
-            adapter_for_all if adapter_for_all else adapter1,
-            adapter_for_all if adapter_for_all else adapter2,
-            fastq1, fastq2,
-            trimmed1, trimmed2)
+        cmd = f'cutadapt {cutadapt_param} -a {adapter_for_all or adapter1} -A {adapter_for_all or adapter2} {fastq1} {fastq2} -o {trimmed1} -p {trimmed2}'
+
         run_shell_cmd(cmd)
         return [trimmed1, trimmed2]
     else:
@@ -141,30 +133,28 @@ def main():
     log.info('Initializing and making output directory...')
     mkdir_p(args.out_dir)
 
-    # declare temp arrays
-    temp_files = []  # files to deleted later at the end
-
     log.info('Detecting adapters...')
     for i in range(len(args.fastqs)):
         # for each fastq to be merged later
-        log.info('Detecting adapters for merge_id={}...'.format(
-            i+1))
+        log.info(f'Detecting adapters for merge_id={i + 1}...')
         fastqs = args.fastqs[i]  # R1 and R2
         adapters = args.adapters[i]
         if args.paired_end:
-            if not args.adapter and args.auto_detect_adapter and \
-                    not (adapters[0] and adapters[1]):
+            if (
+                not args.adapter
+                and args.auto_detect_adapter
+                and (not adapters[0] or not adapters[1])
+            ):
                 args.adapters[i][0] = detect_most_likely_adapter(fastqs[0])
                 args.adapters[i][1] = detect_most_likely_adapter(fastqs[1])
-                log.info('Detected adapters for merge_id={}, '
-                         'R1: {}, R2: {}'.format(
-                            i+1, args.adapters[i][0], args.adapters[i][1]))
-        else:
-            if not args.adapter and args.auto_detect_adapter and \
+                log.info(
+                    f'Detected adapters for merge_id={i + 1}, R1: {args.adapters[i][0]}, R2: {args.adapters[i][1]}'
+                )
+
+        elif not args.adapter and args.auto_detect_adapter and \
                     not adapters[0]:
-                args.adapters[i][0] = detect_most_likely_adapter(fastqs[0])
-                log.info('Detected adapter for merge_id={}, R1: {}'.format(
-                    i+1, args.adapters[i][0]))
+            args.adapters[i][0] = detect_most_likely_adapter(fastqs[0])
+            log.info(f'Detected adapter for merge_id={i + 1}, R1: {args.adapters[i][0]}')
 
     log.info('Trimming adapters...')
     trimmed_fastqs_R1 = []
@@ -192,13 +182,13 @@ def main():
             trimmed_fastqs_R1.append(fastq)
 
     log.info('Merging fastqs...')
-    log.info('R1 to be merged: {}'.format(trimmed_fastqs_R1))
+    log.info(f'R1 to be merged: {trimmed_fastqs_R1}')
     merge_fastqs(trimmed_fastqs_R1, 'R1', args.out_dir)
     if args.paired_end:
-        log.info('R2 to be merged: {}'.format(trimmed_fastqs_R2))
+        log.info(f'R2 to be merged: {trimmed_fastqs_R2}')
         merge_fastqs(trimmed_fastqs_R2, 'R2', args.out_dir)
 
-    temp_files.extend(trimmed_fastqs_R1)
+    temp_files = list(trimmed_fastqs_R1)
     temp_files.extend(trimmed_fastqs_R2)
 
     log.info('Removing temporary files...')

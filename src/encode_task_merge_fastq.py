@@ -62,13 +62,11 @@ def merge_fastqs(fastqs, end, out_dir):
                           os.path.basename(strip_ext_fastq(fastqs[0])))
 
     if len(fastqs) > 1:
-        merged = '{}.merged.fastq.gz'.format(prefix)
+        merged = f'{prefix}.merged.fastq.gz'
     else:
-        merged = '{}.fastq.gz'.format(prefix)
+        merged = f'{prefix}.fastq.gz'
 
-    cmd = 'zcat -f {} | gzip -nc > {}'.format(
-        ' '.join(fastqs),
-        merged)
+    cmd = f"zcat -f {' '.join(fastqs)} | gzip -nc > {merged}"
     run_shell_cmd(cmd)
     return merged
 
@@ -89,10 +87,10 @@ def main():
             fastqs_R2.append(fastqs[1])
 
     log.info('Merging fastqs...')
-    log.info('R1 to be merged: {}'.format(fastqs_R1))
+    log.info(f'R1 to be merged: {fastqs_R1}')
     merged_R1 = merge_fastqs(fastqs_R1, 'R1', args.out_dir)
     if args.paired_end:
-        log.info('R2 to be merged: {}'.format(fastqs_R2))
+        log.info(f'R2 to be merged: {fastqs_R2}')
         merged_R2 = merge_fastqs(fastqs_R2, 'R2', args.out_dir)
 
     log.info('List all files in output directory...')

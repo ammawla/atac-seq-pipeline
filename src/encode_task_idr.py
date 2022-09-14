@@ -95,15 +95,15 @@ def get_npeak_col_by_rank(rank):
 def idr(basename_prefix, peak1, peak2, peak_pooled, peak_type, chrsz,
         thresh, rank, mem_gb, out_dir):
     prefix = os.path.join(out_dir, basename_prefix)
-    prefix += '.idr{}'.format(thresh)
-    idr_peak = '{}.{}.gz'.format(prefix, peak_type)
-    idr_plot = '{}.unthresholded-peaks.txt.png'.format(prefix)
-    idr_stdout = '{}.log'.format(prefix)
+    prefix += f'.idr{thresh}'
+    idr_peak = f'{prefix}.{peak_type}.gz'
+    idr_plot = f'{prefix}.unthresholded-peaks.txt.png'
+    idr_stdout = f'{prefix}.log'
     # temporary
-    idr_12col_bed = '{}.12-col.bed.gz'.format(peak_type)
-    idr_out = '{}.unthresholded-peaks.txt'.format(prefix)
-    idr_tmp = '{}.unthresholded-peaks.txt.tmp'.format(prefix)
-    idr_out_gz = '{}.unthresholded-peaks.txt.gz'.format(prefix)
+    idr_12col_bed = f'{peak_type}.12-col.bed.gz'
+    idr_out = f'{prefix}.unthresholded-peaks.txt'
+    idr_tmp = f'{prefix}.unthresholded-peaks.txt.tmp'
+    idr_out_gz = f'{prefix}.unthresholded-peaks.txt.gz'
 
     run_shell_cmd(
         'idr --samples {peak1} {peak2} --peak-list {peak_pooled} --input-file-type narrowPeak '

@@ -49,10 +49,13 @@ def parse_arguments():
 def bam2ta_se(bam, out_dir):
     prefix = os.path.join(out_dir,
                           os.path.basename(strip_ext_bam(bam)))
-    ta = '{}.tagAlign.gz'.format(prefix)
+    ta = f'{prefix}.tagAlign.gz'
 
-    cmd = 'bedtools bamtobed -i {} | '
-    cmd += 'awk \'BEGIN{{OFS="\\t"}}{{$4="N";$5="1000";print $0}}\' | '
+    cmd = (
+        'bedtools bamtobed -i {} | '
+        + 'awk \'BEGIN{{OFS="\\t"}}{{$4="N";$5="1000";print $0}}\' | '
+    )
+
     cmd += 'gzip -nc > {}'
     cmd = cmd.format(
         bam,
@@ -64,22 +67,23 @@ def bam2ta_se(bam, out_dir):
 def bam2ta_pe(bam, nth, out_dir):
     prefix = os.path.join(out_dir,
                           os.path.basename(strip_ext_bam(bam)))
-    ta = '{}.tagAlign.gz'.format(prefix)
+    ta = f'{prefix}.tagAlign.gz'
     # intermediate files
-    bedpe = '{}.bedpe.gz'.format(prefix)
+    bedpe = f'{prefix}.bedpe.gz'
     nmsrt_bam = samtools_name_sort(bam, nth, out_dir)
 
-    cmd1 = 'LC_COLLATE=C bedtools bamtobed -bedpe -mate1 -i {} | '
-    # cmd1 += 'sort -k1,1 -k2,2n -k3,3n | '
-    cmd1 += 'gzip -nc > {}'
+    cmd1 = (
+        'LC_COLLATE=C bedtools bamtobed -bedpe -mate1 -i {} | '
+        + 'gzip -nc > {}'
+    )
+
     cmd1 = cmd1.format(
         nmsrt_bam,
         bedpe)
     run_shell_cmd(cmd1)
     rm_f(nmsrt_bam)
 
-    cmd2 = 'zcat -f {} | '
-    cmd2 += 'awk \'BEGIN{{OFS="\\t"}}'
+    cmd2 = 'zcat -f {} | ' + 'awk \'BEGIN{{OFS="\\t"}}'
     cmd2 += '{{printf "%s\\t%s\\t%s\\tN\\t1000\\t%s\\n'
     cmd2 += '%s\\t%s\\t%s\\tN\\t1000\\t%s\\n",'
     cmd2 += '$1,$2,$3,$9,$4,$5,$6,$10}}\' | '
@@ -95,10 +99,9 @@ def bam2ta_pe(bam, nth, out_dir):
 def tn5_shift_ta(ta, out_dir):
     prefix = os.path.join(out_dir,
                           os.path.basename(strip_ext_ta(ta)))
-    shifted_ta = '{}.tn5.tagAlign.gz'.format(prefix)
+    shifted_ta = f'{prefix}.tn5.tagAlign.gz'
 
-    cmd = 'zcat -f {} | '
-    cmd += 'awk \'BEGIN {{OFS = "\\t"}}'
+    cmd = 'zcat -f {} | ' + 'awk \'BEGIN {{OFS = "\\t"}}'
     cmd += '{{ if ($6 == "+") {{$2 = $2 + 4}} '
     cmd += 'else if ($6 == "-") {{$3 = $3 - 5}} print $0}}\' | '
     cmd += 'gzip -nc > {}'

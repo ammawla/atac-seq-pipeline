@@ -50,10 +50,7 @@ def get_gc(qsorted_bam_file, reference_fasta, prefix, java_heap=None):
     output_file = '{0}.gc.txt'.format(prefix)
     plot_file = '{0}.gcPlot.pdf'.format(prefix)
     summary_file = '{0}.gcSummary.txt'.format(prefix)
-    if java_heap is None:
-        java_heap_param = '-Xmx10G'
-    else:
-        java_heap_param = '-Xmx{}'.format(java_heap)
+    java_heap_param = '-Xmx10G' if java_heap is None else f'-Xmx{java_heap}'
     get_gc_metrics = ('java {6} -XX:ParallelGCThreads=1 -jar '
                       '{5} '
                       'CollectGcBiasMetrics R={0} I={1} O={2} '

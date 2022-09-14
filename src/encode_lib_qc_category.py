@@ -73,7 +73,7 @@ class QCLog(object):
             for i, line in enumerate(lines.split('\n')):
                 arr = line.split('\t')
                 if len(arr) == 1:
-                    key = 'value' + str(i)
+                    key = f'value{str(i)}'
                     val = to_number(arr[0])
                 elif len(arr) == 2:
                     key = arr[0]
@@ -189,10 +189,7 @@ class QCCategory(object):
         html += self.__qc_plots_to_html()
         for cat in self._child_categories:
             html += cat.to_html()
-        if html == '':
-            return ''
-        else:
-            return self._html_head + html + self._html_foot
+        return '' if html == '' else self._html_head + html + self._html_foot
 
     def __qc_logs_to_html(self):
         """Print HTML only if there are contents to be shown
@@ -204,13 +201,11 @@ class QCCategory(object):
         if len(self._qc_logs) == 0:
             return ''
 
-        html = '<table border="1" style="border-collapse:collapse">'
-
         # make HTML header row
         header = '<tr><th bgcolor="#EEEEEE">'
         arr = [' ']
         if len(self._qc_logs) == 1 and \
-                list(self._qc_logs.keys())[0] is None:
+                    list(self._qc_logs.keys())[0] is None:
             # skip header for single qc log
             arr += ['Description']
         else:
@@ -227,33 +222,24 @@ class QCCategory(object):
                 all_keys[new_key] = None
 
         content = ''
-        for key in all_keys.keys():
-            if self._map_key_desc is None:
-                long_key_name = key
-            else:
-                long_key_name = self._map_key_desc[key]
-            content += '<tr><th bgcolor="#EEEEEE" style="text-align:left">'\
-                '{}</th><td>'.format(long_key_name)
+        for key in all_keys:
+            long_key_name = key if self._map_key_desc is None else self._map_key_desc[key]
+            content += f'<tr><th bgcolor="#EEEEEE" style="text-align:left">{long_key_name}</th><td>'
+
 
             qc_log_content = []
             for qc_log_key, qc_log in self._qc_logs.items():
                 d = qc_log.to_dict()
-                if key not in d:
-                    val = 'N/A'
-                else:
-                    val = str(d[key])
+                val = 'N/A' if key not in d else str(d[key])
                 qc_log_content.append(val)
 
             content += '</td><td>'.join(qc_log_content)
             content += '</td></tr>\n'
 
-        html += header
+        html = '<table border="1" style="border-collapse:collapse">' + header
         html += content
         html += '</table><br>\n'
         return html
 
     def __qc_plots_to_html(self):
-        html = ''
-        for k, qc_plot in self._qc_plots.items():
-            html += qc_plot.to_html()
-        return html
+        return ''.join(qc_plot.to_html() for k, qc_plot in self._qc_plots.items())

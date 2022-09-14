@@ -35,25 +35,24 @@ def parse_arguments():
 
 
 def pool_ta(tas, col, basename_prefix, out_dir):
-    if len(tas) > 1:
-        if basename_prefix is not None:
-            prefix = os.path.join(out_dir, basename_prefix)
-        else:
-            prefix = os.path.join(out_dir,
-                              os.path.basename(strip_ext_ta(tas[0])))
-        pooled_ta = '{}.pooled.tagAlign.gz'.format(prefix)
-
-        cmd = 'zcat -f {} | '
-        if col is not None:
-            cmd += 'cut -f 1-{} | '.format(col)
-        cmd += 'gzip -nc > {}'
-        cmd = cmd.format(
-            ' '.join(tas),
-            pooled_ta)
-        run_shell_cmd(cmd)
-        return pooled_ta
-    else:
+    if len(tas) <= 1:
         raise ValueError('Needs at least two TAs (or BEDs) to be pooled.')
+    if basename_prefix is not None:
+        prefix = os.path.join(out_dir, basename_prefix)
+    else:
+        prefix = os.path.join(out_dir,
+                          os.path.basename(strip_ext_ta(tas[0])))
+    pooled_ta = f'{prefix}.pooled.tagAlign.gz'
+
+    cmd = 'zcat -f {} | '
+    if col is not None:
+        cmd += f'cut -f 1-{col} | '
+    cmd += 'gzip -nc > {}'
+    cmd = cmd.format(
+        ' '.join(tas),
+        pooled_ta)
+    run_shell_cmd(cmd)
+    return pooled_ta
 
 
 def main():
